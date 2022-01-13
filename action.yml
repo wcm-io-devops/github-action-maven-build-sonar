@@ -1,0 +1,77 @@
+name: Maven Build with SonarCloud
+description: Composite GitHub Action that verifies a Maven Build and analyzes the results in SonarCloud
+
+inputs:
+  os:
+    description: Operation system
+    required: true
+  java-version:
+    description: Java version
+    required: true
+  java-distribution:
+    description: Java distribution
+    required: false
+    default: temurin
+  maven-executable:
+    description: Maven executable
+    required: false
+    default: mvn    
+  maven-verify-args:
+    description: Maven goals and command line parameter to verify the build
+    required: false
+    default: -s ./.maven-settings.xml -Pcontinuous-integration -B -U clean verify
+  maven-sonar-args:
+    description: Maven goals and command line parameters to execute sonar analysis
+    required: false
+    default: org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{github.repository_owner}}_${{github.event.repository.name}} -Dsonar.projectName=${{github.event.repository.name}}
+  maven-additional-args:
+    description: Additional maven goals or command line parameters to be added to all maven calls
+    required: false
+  sonar-run-on-os:
+    description: Run sonar (only) on this operation system
+    required: true
+  sonar-run-on-java-version:
+    description: Run sonar (only) on this java version
+    required: true
+  sonar-token:
+    description: SONAR_TOKEN secret. This is not available for external PRs, so it may be empty and Sonar is skipped in this case.
+    required: false
+  github-token:
+    description: GITHUB_TOKEN secret
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+    - name: Setup JDK
+      uses: actions/setup-java@v2
+      with:
+        distribution: ${{ inputs.java-distribution }}
+        java-version: ${{ inputs.java-version }}
+        cache: maven
+
+    - name: Cache SonarCloud packages
+      uses: actions/cache@v1
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+
+    - name: Build and verify (with Sonar)
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}  # Needed to get PR information, if any
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+      run:  ${{ inputs.maven-executable }} ${{ inputs.maven-verify-args }} ${{ inputs.maven-additional-args }} ${{ inputs.maven-sonar-args }}
+      shell: bash
+      if: ${{ inputs.os == inputs.sonar-run-on-os && inputs.java-version == inputs.sonar-run-on-java-version && inputs.sonar-token != '' }}
+
+    - name: Build and verify (without Sonar)
+      run: ${{ inputs.maven-executable }} ${{ inputs.maven-verify-args }} ${{ inputs.maven-additional-args }}
+      shell: bash
+      if: ${{ inputs.os != inputs.sonar-run-on-os || inputs.java-version != inputs.sonar-run-on-java-version || inputs.sonar-token == '' }}
