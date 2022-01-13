@@ -67,7 +67,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ inputs.sonar-token }}
-      run:  ${{ inputs.maven-executable }} ${{ inputs.maven-verify-args }} ${{ inputs.maven-additional-args }} ${{ inputs.maven-sonar-args }}
+      run: ${{ inputs.maven-executable }} ${{ inputs.maven-verify-args }} ${{ inputs.maven-additional-args }} ${{ inputs.maven-sonar-args }}
       shell: bash
       if: ${{ inputs.os == inputs.sonar-run-on-os && inputs.java-version == inputs.sonar-run-on-java-version && inputs.sonar-token != '' }}
 
