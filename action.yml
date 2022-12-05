@@ -45,19 +45,19 @@ runs:
 
   steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
     - name: Setup JDK
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
         distribution: ${{ inputs.java-distribution }}
         java-version: ${{ inputs.java-version }}
         cache: maven
 
     - name: Cache SonarCloud packages
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-sonar
@@ -67,7 +67,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ inputs.sonar-token }}
-      run:  ${{ inputs.maven-executable }} ${{ inputs.maven-verify-args }} ${{ inputs.maven-additional-args }} ${{ inputs.maven-sonar-args }}
+      run: ${{ inputs.maven-executable }} ${{ inputs.maven-verify-args }} ${{ inputs.maven-additional-args }} ${{ inputs.maven-sonar-args }}
       shell: bash
       if: ${{ inputs.os == inputs.sonar-run-on-os && inputs.java-version == inputs.sonar-run-on-java-version && inputs.sonar-token != '' }}
 

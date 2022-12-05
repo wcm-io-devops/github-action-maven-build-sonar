@@ -5,7 +5,7 @@ Composite GitHub Action that verifies a Maven Build and analyzes the results in 
 
 Usage example:
 
-```
+```yaml
 # Build validation
 
 name: Build
