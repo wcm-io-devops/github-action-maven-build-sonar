@@ -12,14 +12,9 @@ name: Build
 
 on:
   push:
-    branches-ignore:
-      - master
-      - experimental/**
+    branches:
+      - develop
   pull_request:
-    types: [opened, synchronize, reopened]
-    branches-ignore:
-      - master
-      - experimental/**
   workflow_dispatch:
 
 jobs:
@@ -40,7 +35,7 @@ jobs:
           java-version: ${{ matrix.java }}
           maven-executable: ./mvnw
           sonar-run-on-os: ubuntu-latest
-          sonar-run-on-java-version: 11
+          sonar-run-on-java-version: 21
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
